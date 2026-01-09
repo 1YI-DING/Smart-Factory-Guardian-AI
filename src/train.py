@@ -1,16 +1,23 @@
 import pandas as pd
+from pathlib import Path
 import joblib
 from sklearn.ensemble import RandomForestClassifier, IsolationForest
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
+# Get the project root directory (one level up from this script)
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 def train_and_save():
     # 1. Load data
+    data_path = BASE_DIR / "data" / "sensor_data.csv"
+
     print("Starting data loading...")
     try:
-        df = pd.read_csv('sensor_data.csv')
+        df = pd.read_csv(data_path)
+        print(f"Successfully loaded data from: {data_path}")
     except FileNotFoundError:
+        print(f"Error: Could not find file at {data_path}")
         print("Error: sensor_data.csv not found, please run the data generation script first!")
         return
 
@@ -42,13 +49,16 @@ def train_and_save():
 
     # 6. Save models to local files
     print("\nSaving models...")
-    joblib.dump(rf_model, 'rf_model.pkl')
-    joblib.dump(iso_model, 'iso_model.pkl')
 
+    model_dir = BASE_DIR / "models"
+    model_dir.mkdir(exist_ok=True)
+
+    joblib.dump(rf_model, model_dir / 'rf_model.pkl')
+    joblib.dump(iso_model, model_dir / 'iso_model.pkl')
     # Recommendation: save the feature list to prevent mismatching order during inference
-    joblib.dump(features, 'feature_names.pkl')
+    joblib.dump(features, model_dir / 'feature_names.pkl')
 
-    print("Success! Models saved as 'rf_model.pkl' and 'iso_model.pkl'")
+    print(f"Success! Models saved in: {model_dir}")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,13 @@
 import streamlit as st
+from pathlib import Path
 import pandas as pd
 import plotly.express as px
 import joblib  # Used for loading model files
 import os
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+data_path = BASE_DIR / "data" / "sensor_data.csv"
+model_dir = BASE_DIR / "models"
 
 # --- Page Configuration ---
 st.set_page_config(page_title="Industrial Equipment Predictive Maintenance Dashboard", layout="wide")
@@ -11,11 +16,11 @@ st.set_page_config(page_title="Industrial Equipment Predictive Maintenance Dashb
 @st.cache_data
 def load_data():
     # Load the "Pro" dataset for visualization
-    if os.path.exists('iot_sensor_data_pro.csv'):
-        df = pd.read_csv('iot_sensor_data_pro.csv')
+    if os.path.exists(data_path):
+        df = pd.read_csv(data_path)
         return df
     else:
-        st.error("Data file 'iot_sensor_data_pro.csv' not found. Please run generate_realistic_data.py first.")
+        st.error(f"Data file {data_path} not found. Please run generate_realistic_data.py first.")
         st.stop()
 
 # --- 2. Load Pre-trained Models ---
@@ -23,10 +28,10 @@ def load_data():
 def load_trained_models():
     """Load models and feature lists from local files to avoid redundant training"""
     try:
-        rf = joblib.load('rf_model.pkl')
-        iso = joblib.load('iso_model.pkl')
+        rf = joblib.load(model_dir / 'rf_model.pkl')
+        iso = joblib.load(model_dir / 'iso_model.pkl')
         # Load the feature order recorded during training to prevent errors
-        features = joblib.load('feature_names.pkl')
+        features = joblib.load(model_dir / 'feature_names.pkl')
         return rf, iso, features
     except FileNotFoundError:
         st.error("Model files not found! Please ensure the 'train.py' script has been run.")
@@ -37,7 +42,7 @@ df = load_data()
 rf_model, iso_model, feature_cols = load_trained_models()
 
 # --- 3. Sidebar: Real-time Input Simulator ---
-st.sidebar.header("🕹️ Real-time Sensor Simulator")
+st.sidebar.header("Real-time Sensor Simulator")
 
 def user_input_features():
     # Input fields correspond to training features: 'Vibration', 'Temperature', 'Pressure', 'OperatingHours', 'Vibration_Mean'
@@ -60,7 +65,7 @@ def user_input_features():
 input_df = user_input_features()
 
 # --- 4. Main Interface ---
-st.title("🏭 Smart Factory: Equipment Health Monitoring System (Inference)")
+st.title("Smart Factory: Equipment Health Monitoring System (Inference)")
 st.markdown("This version loads trained models directly from disk, saving training resources.")
 
 # Row 1: Key Metrics
@@ -74,23 +79,23 @@ st.divider()
 # Row 2: Real-time Prediction Panel
 res1, res2 = st.columns(2)
 with res1:
-    st.subheader("🔮 Failure Risk Prediction")
+    st.subheader("Failure Risk Prediction")
     # Get failure probability
     prob = rf_model.predict_proba(input_df)[0][1]
     if prob > 0.5:
-        st.error(f"⚠️ High Risk! Failure Probability: {prob:.2%}")
+        st.error(f"High Risk! Failure Probability: {prob:.2%}")
         st.button("Create Maintenance Order Now")
     else:
-        st.success(f"✅ Healthy Status (Failure Probability: {prob:.2%})")
+        st.success(f"Healthy Status (Failure Probability: {prob:.2%})")
 
 with res2:
-    st.subheader("🔍 Operation Pattern Analysis")
+    st.subheader("Operation Pattern Analysis")
     # Isolation Forest prediction: 1 Normal, -1 Anomaly
     is_anomaly = iso_model.predict(input_df)[0]
     if is_anomaly == -1:
-        st.warning("🚨 Abnormal pattern detected! Check for sensor drift.")
+        st.warning("Abnormal pattern detected! Check for sensor drift.")
     else:
-        st.info("👍 Normal operation pattern")
+        st.info("Normal operation pattern")
 
 st.divider()
 

@@ -1,13 +1,17 @@
 from fastapi import FastAPI
+from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 import joblib
 import uvicorn
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+data_path = BASE_DIR / "data" / "sensor_data.csv"
+model_dir = BASE_DIR / "models"
+
 app = FastAPI(title="Equipment Health Monitoring API")
 
-
-rf_model = joblib.load('rf_model.pkl')
-iso_model = joblib.load('iso_model.pkl')
+rf_model = joblib.load(model_dir / 'rf_model.pkl')
+iso_model = joblib.load(model_dir / 'iso_model.pkl')
 
 
 class SensorInput(BaseModel):

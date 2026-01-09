@@ -91,7 +91,7 @@ def user_input_features():
 input_df = user_input_features()
 
 # --- 4. Main Interface Layout ---
-st.title("🏭 Smart Manufacturing: Predictive Maintenance Dashboard")
+st.title("Smart Manufacturing: Predictive Maintenance Dashboard")
 st.markdown("This system utilizes Random Forest and Isolation Forest algorithms to monitor industrial equipment health in real-time.")
 
 # Row 1: Core Metrics
@@ -107,27 +107,27 @@ st.divider()
 res_col1, res_col2 = st.columns(2)
 
 with res_col1:
-    st.subheader("🔮 Failure Risk Prediction")
+    st.subheader("Failure Risk Prediction")
     prediction = rf_model.predict(input_df)[0]
     prob = rf_model.predict_proba(input_df)[0][1]
 
     if prediction == 1:
-        st.error(f"⚠️ High failure risk detected! (Probability: {prob:.2%})")
+        st.error(f"High failure risk detected! (Probability: {prob:.2%})")
     else:
-        st.success(f"✅ Equipment operating normally (Failure probability: {prob:.2%})")
+        st.success(f"Equipment operating normally (Failure probability: {prob:.2%})")
 
 with res_col2:
-    st.subheader("🔍 Anomaly Detection")
+    st.subheader("Anomaly Detection")
     is_anomaly = iso_model.predict(input_df)[0]
     if is_anomaly == -1:
-        st.warning("🚨 Atypical operating pattern detected (Potential new failure type)")
+        st.warning("Atypical operating pattern detected (Potential new failure type)")
     else:
-        st.info("👍 Operating pattern follows historical norms")
+        st.info("Operating pattern follows historical norms")
 
 st.divider()
 
 # Row 3: Visual Analysis
-st.subheader("📊 Sensor Correlation Analysis")
+st.subheader("Sensor Correlation Analysis")
 fig = px.scatter(
     df,
     x="Rotational speed [rpm]",
@@ -140,7 +140,7 @@ fig = px.scatter(
 st.plotly_chart(fig, use_container_width=True)
 
 # Row 4: Feature Importance
-st.subheader("💡 Which factors affect equipment life the most?")
+st.subheader("Which factors affect equipment life the most?")
 importances = pd.DataFrame({
     'Feature': feature_cols,
     'Importance': rf_model.feature_importances_

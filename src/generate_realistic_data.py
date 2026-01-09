@@ -1,6 +1,16 @@
 import pandas as pd
+import os
 import numpy as np
+from pathlib import Path
 from datetime import datetime, timedelta
+
+# Get the project root directory (one level up from this script)
+BASE_DIR = Path(__file__).resolve().parent.parent
+# Define the target data directory
+save_path = BASE_DIR / "data" / "sensor_data.csv"
+
+# Automatically create the directory if it doesn't exist
+save_path.parent.mkdir(parents=True, exist_ok=True)
 
 # Set parameters
 n_samples = 10000
@@ -53,7 +63,7 @@ df = pd.DataFrame({
 })
 
 # Rolling features (feature engineering)
-df['Vibration_Mean'] = df['Vibration'].rolling(window=20).mean().fillna(method='bfill')
+df['Vibration_Mean'] = df['Vibration'].rolling(window=20).mean().bfill()
 
-df.to_csv('sensor_data.csv', index=False)
+df.to_csv(save_path, index=False)
 print("Realistic industrial dataset generated: sensor_data.csv")
